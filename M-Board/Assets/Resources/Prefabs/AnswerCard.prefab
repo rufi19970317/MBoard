@@ -140,7 +140,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85f808e01a14a414d8d8ce43096b15a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  frontImage: {fileID: 7981817580878302310}
+  frontImage1: {fileID: 5619066676027325359}
+  frontImage2: {fileID: 3249481371137101681}
   answerResult: []
   particle: {fileID: 6463288008617837972}
 --- !u!1 &1610683165072686375

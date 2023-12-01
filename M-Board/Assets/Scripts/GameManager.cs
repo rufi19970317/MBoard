@@ -103,7 +103,6 @@ public class GameManager : MonoBehaviour
         // µ¦ Ä«µå ¼¼ÆÃ
         uiManager.SetDeckCard(cardDeckManager.DrawCard());
 
-        answerManager.SetAllAnswer();
         answerManager.SetAnswer();
 
         nowPlayerHand = uiManager.GetPlayerHand(0).GetComponent<PlayerHand>();
@@ -320,7 +319,6 @@ public class GameManager : MonoBehaviour
         if (!AnswerCardPopUp.activeSelf)
         {
             AnswerCardPopUp.SetActive(true);
-            AnswerCardPopUp.transform.GetChild(1).GetComponent<Image>().sprite = answerCard.frontImage.sprite;
             GameObject grid = AnswerCardPopUp.transform.GetChild(2).gameObject;
             grid.SetActive(true);
             foreach(Transform child in grid.transform)
@@ -352,7 +350,6 @@ public class GameManager : MonoBehaviour
             }
 
             grid.transform.GetChild(0).gameObject.SetActive(true);
-            grid.transform.GetChild(0).GetComponent<Image>().sprite = answer.frontImage.sprite;
             for (int i = 0; i < result.Count; i++)
             {
                 CardStruct cardStruct = result[i].cardInfo;
@@ -376,7 +373,6 @@ public class GameManager : MonoBehaviour
             }
 
             grid.transform.GetChild(0).gameObject.SetActive(true);
-            grid.transform.GetChild(0).GetComponent<Image>().sprite = answer.frontImage.sprite;
             for (int i = 0; i < result.Count; i++)
             {
                 CardStruct cardStruct = result[i].cardInfo;

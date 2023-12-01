@@ -5,288 +5,162 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
+
+public class DataManager
+{
+    // 데이터 저장용 딕셔너리
+    //public Dictionary<int, Data.Spawn> SpawnDict { get; private set; } = new Dictionary<int, Data.Spawn>();
+
+    // 딕셔너리 생성
+    public void Init()
+    {
+        //SpawnDict = LoadJson<Data.SpawnData, int, Data.Spawn>("SpawnData").MakeDict();
+    }
+
+    // Json 데이터 불러오기
+    Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
+    {
+        TextAsset textAsset = Resources.Load<TextAsset>($"Data/{path}");
+        return JsonUtility.FromJson<Loader>(textAsset.text);
+    }
+}
+
 public class AnswerManager : MonoBehaviour
 {
-    public class Answer
+    // 고정
+    public struct LeaderAnswerSet
+    {
+        public string name;
+        public List<CardDeckManager.UniverSity> university;
+        public int point;
+
+        public LeaderAnswerSet(string name, List<CardDeckManager.UniverSity> university, int point)
+        {
+            this.name = name;
+            this.university = university;
+            this.point = point;
+        }
+    }
+
+    public class LeaderAnswer
+    {
+        public List<LeaderAnswerSet> leaderAnswerSet = new List<LeaderAnswerSet>();
+
+        public LeaderAnswer()
+        {
+            SetLeaderAnswer();
+        }
+
+        void SetLeaderAnswer()
+        {
+            //1
+            leaderAnswerSet.Add(new LeaderAnswerSet("파란학기제 (개발)",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Software, CardDeckManager.UniverSity.Engineering }, 1));
+            //2
+            leaderAnswerSet.Add(new LeaderAnswerSet("파란학기제 (출판)",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Humanities, CardDeckManager.UniverSity.Joker }, 2));
+            //3
+            leaderAnswerSet.Add(new LeaderAnswerSet("파란학기제 (의료)",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Medical, CardDeckManager.UniverSity.Pharmacy }, 1));
+            //4
+            leaderAnswerSet.Add(new LeaderAnswerSet("파란학기제 (창업)",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Software, CardDeckManager.UniverSity.Business }, 1));
+            //5
+            leaderAnswerSet.Add(new LeaderAnswerSet("파란학기제 (실험)",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.NaturalScience, CardDeckManager.UniverSity.NaturalScience }, 3));
+            //6
+            leaderAnswerSet.Add(new LeaderAnswerSet("대동제 무대",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Joker, CardDeckManager.UniverSity.Joker }, 4));
+            //7
+            leaderAnswerSet.Add(new LeaderAnswerSet("축구부 프론트",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.IC, CardDeckManager.UniverSity.Nursing }, 1));
+            //8
+            leaderAnswerSet.Add(new LeaderAnswerSet("아주팝스",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.IC, CardDeckManager.UniverSity.Pharmacy }, 1));
+            //9
+            leaderAnswerSet.Add(new LeaderAnswerSet("소프트콘",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Software, CardDeckManager.UniverSity.Software }, 3));
+            //10
+            leaderAnswerSet.Add(new LeaderAnswerSet("캡스톤디자인",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Humanities, CardDeckManager.UniverSity.SocialSciences }, 1));
+            //11
+            leaderAnswerSet.Add(new LeaderAnswerSet("아주 Debate",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Business, CardDeckManager.UniverSity.Humanities }, 1));
+            //12
+            leaderAnswerSet.Add(new LeaderAnswerSet("아주대 학습공동체",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.SocialSciences, CardDeckManager.UniverSity.Joker }, 2));
+            //13
+            leaderAnswerSet.Add(new LeaderAnswerSet("문학과 철학",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Medical, CardDeckManager.UniverSity.Nursing }, 2));
+            //14
+            leaderAnswerSet.Add(new LeaderAnswerSet("문학과 예술",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.NaturalScience, CardDeckManager.UniverSity.Engineering }, 1));
+            //15
+            leaderAnswerSet.Add(new LeaderAnswerSet("인간과 사회",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Pharmacy, CardDeckManager.UniverSity.Nursing }, 1));
+            //16
+            leaderAnswerSet.Add(new LeaderAnswerSet("자연과 과학",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.SocialSciences, CardDeckManager.UniverSity.Business }, 1));
+            //17
+            leaderAnswerSet.Add(new LeaderAnswerSet("아주희망",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Humanities, CardDeckManager.UniverSity.Engineering }, 1));
+            //18
+            leaderAnswerSet.Add(new LeaderAnswerSet("창업 경진대회",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Engineering, CardDeckManager.UniverSity.IC }, 1));
+            //19
+            leaderAnswerSet.Add(new LeaderAnswerSet("전공기부단",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Medical, CardDeckManager.UniverSity.IC }, 1));
+            //20
+            leaderAnswerSet.Add(new LeaderAnswerSet("GAIA",
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.SocialSciences, CardDeckManager.UniverSity.Business }, 1));
+
+            leaderAnswerSet.Shuffle();
+        }
+
+        public List<LeaderAnswerSet> GetRanLeaderAnswer()
+        {
+
+            return leaderAnswerSet;
+        }
+    }
+
+    // 고정
+    public class MemberAnswer
     {
         public List<CardDeckManager.UniverSity> university = new List<CardDeckManager.UniverSity>();
-        public List<Grades> grades = new List<Grades>();
+        public List<int> grade = new List<int>();
 
-        public Answer(List<CardDeckManager.UniverSity> university, List<Grades> grades)
+        public MemberAnswer()
         {
-            this.university = university;
-            this.grades = grades;
+            
+        }
+
+        public void SetMemberAnswer()
+        {
+
         }
     }
 
-    public class Grades
+    // 유동
+    public class InGameAnswer
     {
-        public enum Compare
-        {
-            Up,
-            Equal,
-            Down
-        }
+        public List<LeaderAnswer> leaders = new List<LeaderAnswer>();
+        public List<MemberAnswer> members = new List<MemberAnswer>();
 
-        public Compare compare;
-        public int grade;
-
-        public Grades(Compare compare, int grade)
+        public InGameAnswer(List<LeaderAnswer> leaders, List<MemberAnswer> members)
         {
-            this.compare = compare;
-            this.grade = grade;
+            this.leaders = leaders;
+            this.members = members;
         }
     }
 
-    List<Answer> answerPaper = new List<Answer>();
-    #region 답지
-    public void SetAllAnswer()
+    //
+    void SetLeaders()
     {
-        answerPaper.Clear();
-        #region 1번
-        List<CardDeckManager.UniverSity> university = new List<CardDeckManager.UniverSity>();
-        List<Grades> grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Engineering);
-        university.Add(CardDeckManager.UniverSity.SocialSciences);
-        university.Add(CardDeckManager.UniverSity.Software);
-        university.Add(CardDeckManager.UniverSity.Business);
-        grades.Add(new Grades(Grades.Compare.Up, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 2번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Humanities);
-        university.Add(CardDeckManager.UniverSity.SocialSciences);
-        university.Add(CardDeckManager.UniverSity.Software);
-        university.Add(CardDeckManager.UniverSity.Business);
-        grades.Add(new Grades(Grades.Compare.Up, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 3번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Medical);
-        university.Add(CardDeckManager.UniverSity.Nursing);
-        university.Add(CardDeckManager.UniverSity.Nursing);
-        university.Add(CardDeckManager.UniverSity.Pharmacy);
-        grades.Add(new Grades(Grades.Compare.Equal, 5));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 4번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Engineering);
-        university.Add(CardDeckManager.UniverSity.Engineering);
-        university.Add(CardDeckManager.UniverSity.NaturalScience);
-        university.Add(CardDeckManager.UniverSity.NaturalScience);
-        grades.Add(new Grades(Grades.Compare.Up, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 5번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Humanities);
-        university.Add(CardDeckManager.UniverSity.Humanities);
-        university.Add(CardDeckManager.UniverSity.SocialSciences);
-        university.Add(CardDeckManager.UniverSity.Business);
-        grades.Add(new Grades(Grades.Compare.Up, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 6번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 2));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 7번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Nursing);
-        university.Add(CardDeckManager.UniverSity.Engineering);
-        university.Add(CardDeckManager.UniverSity.Humanities);
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 8번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Pharmacy);
-        university.Add(CardDeckManager.UniverSity.Medical);
-        university.Add(CardDeckManager.UniverSity.IC);
-        university.Add(CardDeckManager.UniverSity.NaturalScience);
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 9번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Engineering);
-        university.Add(CardDeckManager.UniverSity.Engineering);
-        university.Add(CardDeckManager.UniverSity.IC);
-        university.Add(CardDeckManager.UniverSity.Software);
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 10번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Software);
-        university.Add(CardDeckManager.UniverSity.Software);
-        university.Add(CardDeckManager.UniverSity.Software);
-        grades.Add(new Grades(Grades.Compare.Equal, 5));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 11번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.NaturalScience);
-        university.Add(CardDeckManager.UniverSity.SocialSciences);
-        university.Add(CardDeckManager.UniverSity.IC);
-        university.Add(CardDeckManager.UniverSity.Engineering);
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 12번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Humanities);
-        university.Add(CardDeckManager.UniverSity.Business);
-        university.Add(CardDeckManager.UniverSity.SocialSciences);
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 13번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        grades.Add(new Grades(Grades.Compare.Equal, 5));
-        grades.Add(new Grades(Grades.Compare.Equal, 5));
-        grades.Add(new Grades(Grades.Compare.Equal, 2));
-        grades.Add(new Grades(Grades.Compare.Equal, 2));
-        grades.Add(new Grades(Grades.Compare.Equal, 1));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 14번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Pharmacy);
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 15번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Medical);
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 16번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.IC);
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 17번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Humanities);
-        university.Add(CardDeckManager.UniverSity.Nursing);
-        university.Add(CardDeckManager.UniverSity.SocialSciences);
-        university.Add(CardDeckManager.UniverSity.Business);
-        grades.Add(new Grades(Grades.Compare.Equal, 3));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 18번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        grades.Add(new Grades(Grades.Compare.Equal, 2));
-        grades.Add(new Grades(Grades.Compare.Equal, 2));
-        grades.Add(new Grades(Grades.Compare.Equal, 2));
-        grades.Add(new Grades(Grades.Compare.Equal, 1));
-        grades.Add(new Grades(Grades.Compare.Equal, 1));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 19번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        university.Add(CardDeckManager.UniverSity.Business);
-        university.Add(CardDeckManager.UniverSity.Business);
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
-
-        #region 20번
-        university = new List<CardDeckManager.UniverSity>();
-        grades = new List<Grades>();
-
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        grades.Add(new Grades(Grades.Compare.Equal, 4));
-        answerPaper.Add(new Answer(university, grades));
-        #endregion
 
     }
-    #endregion
 
-    List<Answer> NowAnswerPaper = new List<Answer>();
+    List<InGameAnswer> NowAnswerPaper = new List<InGameAnswer>();
 
     public void SetAnswer()
     {
@@ -331,6 +205,7 @@ public class AnswerManager : MonoBehaviour
 
     public void FindAnswer(List<Card> playerCards)
     {
+        /*
         int num = 0;
         foreach (Answer answer in NowAnswerPaper)
         {
@@ -406,6 +281,75 @@ public class AnswerManager : MonoBehaviour
             }
             num++;
         }
+        */
+
+        #region Default Answer List
+        // 전부 같은 등급일 경우
+        bool isDefaultAnswer_SameGrade = false;
+        int answerNum = 0;
+
+        for(int i = 1; i <= 5; i++)
+        {
+            int num = 0;
+            for(int j = 0; i < playerCards.Count; j++)
+            {
+                if (playerCards[j].cardInfo.num == i)
+                {
+                    num++;
+                }
+            }
+
+            if (num >= 5)
+            {
+                isDefaultAnswer_SameGrade = true;
+                answerNum = i;
+                break;
+            }
+        }
+        // 전부 같은 대학일 경우
+        bool isDefaultAnswer_SameUniversity = false;
+        CardDeckManager.UniverSity answerUniversity;
+        for(int i = 0; i < System.Enum.GetValues(typeof(CardDeckManager.UniverSity)).Length - 1; i++)
+        {
+            int num = 0;
+            for(int j = 0; j < playerCards.Count; j++)
+            {
+                if (playerCards[j].cardInfo.univerSity == (CardDeckManager.UniverSity)i)
+                {
+                    num++;
+                }
+            }
+
+            if(num >= 5)
+            {
+                isDefaultAnswer_SameUniversity = true;
+                answerUniversity = (CardDeckManager.UniverSity)i;
+                break;
+            }
+        }
+
+        // 1, 2, 3, 4, 5
+        bool isDefaultAnswer_GradeStair = false;
+        for(int i = 1; i <= 5; i++)
+        {
+            bool isSame = false;
+            for(int j = 0; j < playerCards.Count; j++)
+            {
+                if (playerCards[j].cardInfo.num == i)
+                {
+                    isSame = true;
+                    break;
+                }
+            }
+
+            if (!isSame)
+                break;
+
+            if (i == 5)
+                isDefaultAnswer_GradeStair = true;
+        }
+        #endregion
+
     }
 
     public void ConfirmAnswer()

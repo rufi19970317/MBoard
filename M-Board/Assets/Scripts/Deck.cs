@@ -10,4 +10,9 @@ public class Deck : MonoBehaviour
         newCard.SetCard(null, card, Card.CardState.DeckCard);
         GameManager.Instance.deckCard = newCard;
     }
+
+    public void SetNullCard(bool isActive)
+    {
+        transform.GetChild(1).gameObject.SetActive(isActive);
+    }
 }

@@ -32,7 +32,8 @@ public class CardDeckManager : MonoBehaviour
         Nursing,
         Pharmacy,
         SocialSciences,
-        Software
+        Software,
+        Joker
     }
 
     // ī�嵦
