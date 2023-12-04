@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
-
+using Unity.VisualScripting;
+using static AnswerManager;
 
 public class DataManager
 {
@@ -27,7 +28,10 @@ public class DataManager
 
 public class AnswerManager : MonoBehaviour
 {
-    // 고정
+    [SerializeField]
+    UI_AnswerList ui_AnswerList;
+
+    #region Leader Answer
     public struct LeaderAnswerSet
     {
         public string name;
@@ -53,12 +57,13 @@ public class AnswerManager : MonoBehaviour
 
         void SetLeaderAnswer()
         {
+            leaderAnswerSet = new List<LeaderAnswerSet>();
             //1
             leaderAnswerSet.Add(new LeaderAnswerSet("파란학기제 (개발)",
                 new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Software, CardDeckManager.UniverSity.Engineering }, 1));
             //2
             leaderAnswerSet.Add(new LeaderAnswerSet("파란학기제 (출판)",
-                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Humanities, CardDeckManager.UniverSity.Joker }, 2));
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Joker, CardDeckManager.UniverSity.Humanities  }, 2));
             //3
             leaderAnswerSet.Add(new LeaderAnswerSet("파란학기제 (의료)",
                 new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Medical, CardDeckManager.UniverSity.Pharmacy }, 1));
@@ -88,7 +93,7 @@ public class AnswerManager : MonoBehaviour
                 new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Business, CardDeckManager.UniverSity.Humanities }, 1));
             //12
             leaderAnswerSet.Add(new LeaderAnswerSet("아주대 학습공동체",
-                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.SocialSciences, CardDeckManager.UniverSity.Joker }, 2));
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Joker, CardDeckManager.UniverSity.SocialSciences  }, 2));
             //13
             leaderAnswerSet.Add(new LeaderAnswerSet("문학과 철학",
                 new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Medical, CardDeckManager.UniverSity.Nursing }, 2));
@@ -119,169 +124,532 @@ public class AnswerManager : MonoBehaviour
 
         public List<LeaderAnswerSet> GetRanLeaderAnswer()
         {
+            List<LeaderAnswerSet> answerSet = new List<LeaderAnswerSet>();
+            answerSet.Add(DrawLeaderCard());
+            answerSet.Add(DrawLeaderCard());
+            answerSet.Add(DrawLeaderCard());
+            answerSet.Add(DrawLeaderCard());
 
-            return leaderAnswerSet;
+            return answerSet;
         }
-    }
 
-    // 고정
-    public class MemberAnswer
-    {
-        public List<CardDeckManager.UniverSity> university = new List<CardDeckManager.UniverSity>();
-        public List<int> grade = new List<int>();
-
-        public MemberAnswer()
+        private LeaderAnswerSet DrawLeaderCard()
         {
-            
-        }
-
-        public void SetMemberAnswer()
-        {
-
+            LeaderAnswerSet nowCard = leaderAnswerSet[0];
+            leaderAnswerSet.RemoveAt(0);
+            return nowCard;
         }
     }
+    #endregion
 
-    // 유동
-    public class InGameAnswer
+    #region Member Answer
+    public struct MemberAnswerSet
     {
-        public List<LeaderAnswer> leaders = new List<LeaderAnswer>();
-        public List<MemberAnswer> members = new List<MemberAnswer>();
+        public int num;
+        public Nullable<CardDeckManager.UniverSity> university;
+        public List<int> grade;
+        public int point;
 
-        public InGameAnswer(List<LeaderAnswer> leaders, List<MemberAnswer> members)
+        public MemberAnswerSet(int num, int point, Nullable<CardDeckManager.UniverSity> university)
         {
-            this.leaders = leaders;
-            this.members = members;
+            this.num = num;
+            this.university = university;
+            this.grade = null;
+            this.point = point;
+        }
+        public MemberAnswerSet(int num, int point, List<int> grade = null)
+        {
+            this.num = num;
+            this.university = null;
+            this.grade = grade;
+            this.point = point;
         }
     }
 
-    //
-    void SetLeaders()
+    public static class MemberAnswer
     {
+        private static List<MemberAnswerSet> memberAnswerSet = new List<MemberAnswerSet>();
 
+        static MemberAnswer()
+        {
+            foreach(CardDeckManager.UniverSity university in Enum.GetValues(typeof(CardDeckManager.UniverSity)))
+            {
+                memberAnswerSet.Add(new MemberAnswerSet(university == CardDeckManager.UniverSity.Joker ? 4:0, university == CardDeckManager.UniverSity.Joker?30:20, university));
+            }
+
+            for(int i = 1; i <= 5; i++)
+            {
+                memberAnswerSet.Add(new MemberAnswerSet(1, i >= 4?20:15, new List<int>() { i, i, i }));
+            }
+
+            memberAnswerSet.Add(new MemberAnswerSet(2, 15, new List<int>() { 5, 4, 3 }));
+            memberAnswerSet.Add(new MemberAnswerSet(2, 10, new List<int>() { 4, 3, 2 }));
+            memberAnswerSet.Add(new MemberAnswerSet(2, 5, new List<int>() { 3, 2, 1 }));
+        }
+
+        public static List<MemberAnswerSet> GetMemberAnswer()
+        {
+            return memberAnswerSet;
+        }
     }
+    #endregion
 
-    List<InGameAnswer> NowAnswerPaper = new List<InGameAnswer>();
+    List<LeaderAnswerSet> NowLeaderAnswerSet = new List<LeaderAnswerSet>();
+    LeaderAnswer LeaderAnswerDeck = new LeaderAnswer();
+
+
+    public void ResetAnswerList()
+    {
+        NowLeaderAnswerSet = new List<LeaderAnswerSet>();
+    }
 
     public void SetAnswer()
     {
-        /*
-        NowAnswerPaper = new List<Answer>();
-
-        // 전부 리셋
-        foreach (Transform child in transform)
-        {
-            Destroy(child.gameObject);
-        }
-
-        System.Random random = new System.Random();
-
-        List<int> list = new List<int>();
-        for (int i = 0; i < 20; i++)
-        {
-            list.Add(i);
-        }
-
-        List<int> answerNum = new List<int>();
-        for (int i = 0; i < 4; i++)
-        {
-            int a = random.Next(0, 20 - i);
-            answerNum.Add(list[a]);
-            list.RemoveAt(a);
-        }
-
-        for(int i = 0; i < answerNum.Count; i++)
-        {
-            NowAnswerPaper.Add(answerPaper[answerNum[i]]);
-        }
-
-        for(int i = 0; i < NowAnswerPaper.Count; i++)
-        {
-            GameObject go = Instantiate(Resources.Load<GameObject>("Prefabs/AnswerCard"), transform);
-
-            go.GetComponent<AnswerCard>().SetAnswer(NowAnswerPaper[i]);
-        }
-        */
+        SetLeaders();
+        SetAnswerOnBoard();
     }
 
-    public void FindAnswer(List<Card> playerCards)
+    void SetLeaders()
     {
-        /*
-        int num = 0;
-        foreach (Answer answer in NowAnswerPaper)
+        NowLeaderAnswerSet = LeaderAnswerDeck.GetRanLeaderAnswer();
+    }
+
+    private void SetAnswerOnBoard()
+    {
+        for(int i = 0; i < transform.childCount; i++)
         {
-            List<Card> sortCards = (from cards in playerCards
-                                    orderby cards.cardInfo.num
-                                    select cards).ToList();
-
-            sortCards = (from cards in sortCards
-                         orderby cards.cardInfo.univerSity
-                         select cards).ToList();
-
-            List<Card> result = new List<Card>();
-            if(answer.university.Count > 0)
-            {
-                for (int i = 0; i < answer.university.Count; i++)
-                {
-                    for(int j = 0; j < sortCards.Count; j++)
-                    {
-                        if (sortCards[j].cardInfo.univerSity == answer.university[i])
-                        {
-                            result.Add(sortCards[j]);
-                            sortCards.RemoveAt(j);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (answer.grades.Count > 0)
-            {
-                List<Grades> sortGrades = (from grade in answer.grades
-                                        orderby grade.grade
-                                        select grade).ToList();
-
-
-                for(int i = 0; i <  sortGrades.Count; i++)
-                {
-                    if (sortGrades[i].compare == Grades.Compare.Equal)
-                    {
-                        for (int j = 0; j < sortCards.Count; j++)
-                        {
-                            if (sortCards[j].cardInfo.num == sortGrades[i].grade)
-                            {
-                                result.Add(sortCards[j]);
-                                sortCards.RemoveAt(j);
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                for (int i = 0; i < sortGrades.Count; i++)
-                {
-                    if (sortGrades[i].compare == Grades.Compare.Up)
-                    {
-                        for (int j = 0; j < sortCards.Count; j++)
-                        {
-                            if (sortCards[j].cardInfo.num >= sortGrades[i].grade)
-                            {
-                                result.Add(sortCards[j]);
-                                sortCards.RemoveAt(j);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (result.Count >= 5)
-            {
-                transform.GetChild(num).GetComponent<AnswerCard>().SetResult(result);
-                GameManager.Instance.EndGame(transform.GetChild(num).GetComponent<AnswerCard>(), result);
-            }
-            num++;
+            transform.GetChild(i).GetComponent<AnswerCard>().SetAnswer(NowLeaderAnswerSet[i]);
         }
-        */
+    }
+
+    public struct PlayerAnswer
+    {
+        public string playerLeaderName;
+        public List<Card> playerLeaderCards;
+        public int playerMemberNum;
+        public List<Card> playerMemberCards;
+        public int point;
+
+        public PlayerAnswer(string playerLeaderName, List<Card> playerLeaderCards, int playerMemberNum, List<Card>playerMemberCards, int point)
+        {
+            this.playerLeaderName = playerLeaderName;
+            this.playerLeaderCards = playerLeaderCards;
+            this.playerMemberNum = playerMemberNum;
+            this.playerMemberCards = playerMemberCards;
+            this.point = point;
+        }
+
+        public int GetPlayerAnswerCardCount()
+        {
+            return playerLeaderCards.Count + playerMemberCards.Count;
+        }
+    }
+
+    private List<Card> FindMemberAnswer(List<Card> leftCard, int num)
+    {
+        List<Card> memberCards = new List<Card>();
+        List<Card> LEFTCARD = new List<Card>();
+        MemberAnswerSet memberAnswer = MemberAnswer.GetMemberAnswer()[num];
+
+        for(int i = 0; i < leftCard.Count; i++)
+        {
+            LEFTCARD.Add(leftCard[i]);
+        }
+
+        if (memberAnswer.university != null)
+        {
+            memberCards = leftCard.FindAll(element => element.cardInfo.univerSity == memberAnswer.university);
+        }
+        else
+        {
+            for (int i = 0; i < memberAnswer.grade.Count; i++)
+            {
+                Card card = LEFTCARD.Find(element => element.cardInfo.num == memberAnswer.grade[i]);
+                if (card != null)
+                {
+                    memberCards.Add(card);
+                    LEFTCARD.Remove(card);
+                }
+            }
+        }
+
+        return memberCards;
+    }
+
+    public void FindAnswer(List<Card> playerCards, bool isPlayer)
+    {
+        #region Leader + Member Answer List
+        // 리더카드 먼저 확인
+        // 조커카드가 있는 경우, 조커카드 먼저 계산
+        // 조커카드가 없는 경우, (5, 5) (5, 4) (4, 5) (4, 4)
+        List<PlayerAnswer> AllPlayerAnswerCardsList = new List<PlayerAnswer>();
+
+        foreach (LeaderAnswerSet leaderAnswer in NowLeaderAnswerSet)
+        {
+            List<CardDeckManager.UniverSity> univerSitiesJoker = leaderAnswer.university.FindAll(element => element == CardDeckManager.UniverSity.Joker);
+            List<Card> playerCardsList = new List<Card>();
+            for(int copy = 0; copy < playerCards.Count; copy++)
+            {
+                playerCardsList.Add(playerCards[copy]);
+            }
+
+            if(univerSitiesJoker.Count == 0)
+            {
+                List<Card> playerLeaderCardsList = new List<Card>();
+                List<Card> playerMemberCardsList = new List<Card>();
+
+                if (leaderAnswer.university[0] != leaderAnswer.university[1])
+                {
+                    List<Card> leaderCards = new List<Card>();
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[0], 4)));
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[0], 5)));
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[1], 4)));
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[1], 5)));
+
+                    
+                    for(int leader1 = 0; leader1 <= 1; leader1++)
+                    {
+                        for(int leader2 = 2; leader2 <= 3; leader2++)
+                        {
+                            if (leaderCards[leader1] != null && leaderCards[leader2] != null)
+                            {
+                                playerCardsList = new List<Card>();
+                                for (int copy = 0; copy < playerCards.Count; copy++)
+                                {
+                                    playerCardsList.Add(playerCards[copy]);
+                                }
+
+                                playerLeaderCardsList = new List<Card>();
+                                playerMemberCardsList = new List<Card>();
+
+                                playerCardsList.Remove(leaderCards[leader1]);
+                                playerLeaderCardsList.Add(leaderCards[leader1]);
+                                playerCardsList.Remove(leaderCards[leader2]);
+                                playerLeaderCardsList.Add(leaderCards[leader2]);
+
+                                for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                                {
+                                    List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                                    if (memberCardList.Count >= 2)
+                                    {
+                                        PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                        AllPlayerAnswerCardsList.Add(playerAnswer);
+                                    }
+                                }
+                            }
+                            else if (leaderCards[leader1] != null || leaderCards[leader2] != null)
+                            {
+                                playerCardsList = new List<Card>();
+                                for (int copy = 0; copy < playerCards.Count; copy++)
+                                {
+                                    playerCardsList.Add(playerCards[copy]);
+                                }
+                                playerLeaderCardsList = new List<Card>();
+                                playerMemberCardsList = new List<Card>();
+
+                                if (leaderCards[leader1] != null)
+                                {
+                                    if(leader2 == 2)
+                                    {
+                                        playerCardsList.Remove(leaderCards[leader1]);
+                                        playerLeaderCardsList.Add(leaderCards[leader1]);
+                                        for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                                        {
+                                            List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                                            if (memberCardList.Count == 3)
+                                            {
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                AllPlayerAnswerCardsList.Add(playerAnswer);
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (leaderCards[leader2] != null)
+                                {
+                                    if (leader1 == 0)
+                                    {
+                                        playerCardsList.Remove(leaderCards[leader2]);
+                                        playerLeaderCardsList.Add(leaderCards[leader2]);
+                                        for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                                        {
+                                            List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                                            if (memberCardList.Count == 3)
+                                            {
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                AllPlayerAnswerCardsList.Add(playerAnswer);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Card card_01 = playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[0], 4));
+                    Card card_02 = playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[1], 5));
+
+                    if (card_01 != null && card_02 != null)
+                    {
+                        playerCardsList.Remove(card_01);
+                        playerLeaderCardsList.Add(card_01);
+                        playerCardsList.Remove(card_02);
+                        playerLeaderCardsList.Add(card_02);
+
+                        for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                        {
+                            List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                            if (memberCardList.Count >= 2)
+                            {
+                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                AllPlayerAnswerCardsList.Add(playerAnswer);
+                            }
+                        }
+                    }
+                    else if (card_01 != null || card_02 != null)
+                    {
+                        playerCardsList = new List<Card>();
+                        for (int copy = 0; copy < playerCards.Count; copy++)
+                        {
+                            playerCardsList.Add(playerCards[copy]);
+                        }
+                        playerLeaderCardsList = new List<Card>();
+                        playerMemberCardsList = new List<Card>();
+
+                        if (card_01 != null)
+                        {
+                            playerCardsList.Remove(card_01);
+                            playerLeaderCardsList.Add(card_01);
+                        }
+                        if (card_02 != null)
+                        {
+                            playerCardsList.Remove(card_02);
+                            playerLeaderCardsList.Add(card_02);
+                        }
+
+                        for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                        {
+                            List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                            if (memberCardList.Count == 3)
+                            {
+                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                AllPlayerAnswerCardsList.Add(playerAnswer);
+                            }
+                        }
+                    }
+                }
+            }
+            else if(univerSitiesJoker.Count >= 1)
+            {
+                List<Card> playerLeaderCardsList = new List<Card>();
+                List<Card> playerMemberCardsList = new List<Card>();
+
+                if (leaderAnswer.university[0] != leaderAnswer.university[1])
+                {
+                    List<Card> leaderCards = new List<Card>();
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[0], 10)));
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[0], 11)));
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[0], 12)));
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[1], 4)));
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[1], 5)));
+
+                    for (int leader1 = 0; leader1 <= 2; leader1++)
+                    {
+                        for (int leader2 = 3; leader2 <= 4; leader2++)
+                        {
+                            if (leaderCards[leader1] != null && leaderCards[leader2] != null)
+                            {
+                                playerCardsList = new List<Card>();
+                                for (int copy = 0; copy < playerCards.Count; copy++)
+                                {
+                                    playerCardsList.Add(playerCards[copy]);
+                                }
+                                playerLeaderCardsList = new List<Card>();
+                                playerMemberCardsList = new List<Card>();
+
+                                playerCardsList.Remove(leaderCards[leader1]);
+                                playerLeaderCardsList.Add(leaderCards[leader1]);
+                                playerCardsList.Remove(leaderCards[leader2]);
+                                playerLeaderCardsList.Add(leaderCards[leader2]);
+
+                                for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                                {
+                                    List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                                    if (memberCardList.Count >= 2)
+                                    {
+                                        PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                        AllPlayerAnswerCardsList.Add(playerAnswer);
+                                    }
+                                }
+                            }
+                            else if (leaderCards[leader1] != null || leaderCards[leader2] != null)
+                            {
+                                playerCardsList = new List<Card>();
+                                for (int copy = 0; copy < playerCards.Count; copy++)
+                                {
+                                    playerCardsList.Add(playerCards[copy]);
+                                }
+                                playerLeaderCardsList = new List<Card>();
+                                playerMemberCardsList = new List<Card>();
+
+                                if (leaderCards[leader1] != null)
+                                {
+                                    if (leader2 == 3)
+                                    {
+                                        playerCardsList.Remove(leaderCards[leader1]);
+                                        playerLeaderCardsList.Add(leaderCards[leader1]);
+
+                                        for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                                        {
+                                            List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                                            if (memberCardList.Count == 3)
+                                            {
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                AllPlayerAnswerCardsList.Add(playerAnswer);
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (leaderCards[leader2] != null)
+                                {
+                                    if (leader1 == 0)
+                                    {
+                                        playerCardsList.Remove(leaderCards[leader2]);
+                                        playerLeaderCardsList.Add(leaderCards[leader2]);
+
+                                        for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                                        {
+                                            List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                                            if (memberCardList.Count == 3)
+                                            {
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                AllPlayerAnswerCardsList.Add(playerAnswer);
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    List<Card> leaderCards = new List<Card>();
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[0], 10)));
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[0], 11)));
+                    leaderCards.Add(playerCardsList.Find(element => element.CompareCard(leaderAnswer.university[0], 12)));
+
+                    for (int leader1 = 0; leader1 <= 1; leader1++)
+                    {
+                        for (int leader2 = leader1 + 1; leader2 <= 2; leader2++)
+                        {
+                            if (leaderCards[leader1] != null && leaderCards[leader2] != null)
+                            {
+                                playerCardsList = new List<Card>();
+                                for (int copy = 0; copy < playerCards.Count; copy++)
+                                {
+                                    playerCardsList.Add(playerCards[copy]);
+                                }
+                                playerLeaderCardsList = new List<Card>();
+                                playerMemberCardsList = new List<Card>();
+
+                                playerCardsList.Remove(leaderCards[leader1]);
+                                playerLeaderCardsList.Add(leaderCards[leader1]);
+                                playerCardsList.Remove(leaderCards[leader2]);
+                                playerLeaderCardsList.Add(leaderCards[leader2]);
+
+                                for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                                {
+                                    List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                                    if (memberCardList.Count >= 2)
+                                    {
+                                        PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                        AllPlayerAnswerCardsList.Add(playerAnswer);
+                                    }
+                                }
+                            }
+                            else if (leaderCards[leader1] != null || leaderCards[leader2] != null)
+                            {
+                                playerCardsList = new List<Card>();
+                                for (int copy = 0; copy < playerCards.Count; copy++)
+                                {
+                                    playerCardsList.Add(playerCards[copy]);
+                                }
+                                playerLeaderCardsList = new List<Card>();
+                                playerMemberCardsList = new List<Card>();
+
+                                if (leaderCards[leader1] != null)
+                                {
+                                    if (leader2 == 1)
+                                    {
+                                        playerCardsList.Remove(leaderCards[leader1]);
+                                        playerLeaderCardsList.Add(leaderCards[leader1]);
+
+                                        for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                                        {
+                                            List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                                            if (memberCardList.Count == 3)
+                                            {
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                AllPlayerAnswerCardsList.Add(playerAnswer);
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (leaderCards[leader2] != null)
+                                {
+                                    if (leader1 == 0)
+                                    {
+                                        playerCardsList.Remove(leaderCards[leader2]);
+                                        playerLeaderCardsList.Add(leaderCards[leader2]);
+
+                                        for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+                                        {
+                                            List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                                            if (memberCardList.Count == 3)
+                                            {
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                AllPlayerAnswerCardsList.Add(playerAnswer);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (AllPlayerAnswerCardsList.Count == 0)
+        {
+            List<Card> playerLeaderCardsList = new List<Card>();
+            List<Card> playerMemberCardsList = new List<Card>();
+
+            for (int i = 0; i < MemberAnswer.GetMemberAnswer().Count; i++)
+            {
+                List<Card> playerCardsList = new List<Card>();
+                for (int copy = 0; copy < playerCards.Count; copy++)
+                {
+                    playerCardsList.Add(playerCards[copy]);
+                }
+
+                List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
+                if (memberCardList.Count == 3)
+                {
+                    PlayerAnswer playerAnswer = new PlayerAnswer("", playerLeaderCardsList, i, memberCardList, 1 * MemberAnswer.GetMemberAnswer()[i].point);
+                    AllPlayerAnswerCardsList.Add(playerAnswer);
+                }
+            }
+        }
+        Debug.Log(AllPlayerAnswerCardsList.Count);
+        if (isPlayer)
+        {
+            ui_AnswerList.SetAnswerList(AllPlayerAnswerCardsList);
+        }
+        #endregion
 
         #region Default Answer List
         // 전부 같은 등급일 경우
@@ -291,7 +659,7 @@ public class AnswerManager : MonoBehaviour
         for(int i = 1; i <= 5; i++)
         {
             int num = 0;
-            for(int j = 0; i < playerCards.Count; j++)
+            for(int j = 0; j < playerCards.Count; j++)
             {
                 if (playerCards[j].cardInfo.num == i)
                 {
@@ -349,7 +717,6 @@ public class AnswerManager : MonoBehaviour
                 isDefaultAnswer_GradeStair = true;
         }
         #endregion
-
     }
 
     public void ConfirmAnswer()

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static AnswerManager;
 
 public class UI_AnswerList : MonoBehaviour
 {
@@ -14,6 +15,11 @@ public class UI_AnswerList : MonoBehaviour
     Button openBtn;
     [SerializeField]
     Button closeBtn;
+
+    [SerializeField]
+    GameObject answerFolder;
+    [SerializeField]
+    GameObject contentPrefab;
 
     bool isOpen;
     bool isClose;
@@ -37,6 +43,19 @@ public class UI_AnswerList : MonoBehaviour
         {
             transform.position = Vector3.MoveTowards(transform.position, closePos.transform.position, Time.deltaTime * speed);
             if (transform.position == closePos.transform.position) isClose = false;
+        }
+    }
+
+    public void SetAnswerList(List<PlayerAnswer> AllPlayerAnswerCardsList)
+    {
+        for (int i = 0; i < answerFolder.transform.childCount; i++)
+        {
+            Destroy(answerFolder.transform.GetChild(i).gameObject);
+        }
+
+        foreach (PlayerAnswer card in AllPlayerAnswerCardsList)
+        {
+            Instantiate(contentPrefab, answerFolder.transform).GetComponent<UI_AnswerContent>().SetAnswer(card);
         }
     }
 

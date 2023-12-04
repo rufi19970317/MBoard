@@ -6,7 +6,7 @@ using UnityEngine;
 public class PlayerHand : MonoBehaviour
 {
     public int playerNum = 0;
-    bool isOppo = false;
+    public bool isOppo = false;
 
     [SerializeField]
     Card RepCard;

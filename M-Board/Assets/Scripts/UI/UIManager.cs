@@ -15,8 +15,9 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     Button ResetButton;
 
-
-    public GameObject DiscardZone;
+    public GameObject DiscardZone_Discard;
+    public GameObject DiscardZone_Oppocard;
+    public GameObject ChangeZone;
 
     private void Start()
     {

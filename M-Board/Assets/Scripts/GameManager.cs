@@ -26,7 +26,6 @@ public struct Hand
     }
 }
 
-
 public class GameManager : MonoBehaviour
 {
     private static GameManager instance;
@@ -103,9 +102,11 @@ public class GameManager : MonoBehaviour
         // 덱 카드 세팅
         uiManager.SetDeckCard(cardDeckManager.DrawCard());
 
+        answerManager.ResetAnswerList();
         answerManager.SetAnswer();
 
         nowPlayerHand = uiManager.GetPlayerHand(0).GetComponent<PlayerHand>();
+        FindAnswer(nowPlayerHand);
         enemyManager.SetEnemy(uiManager.GetPlayerHand(1));
 
         // 첫 번째 플레이어부터 게임 시작
@@ -187,6 +188,7 @@ public class GameManager : MonoBehaviour
             CardStruct cardInfo = drawCard.cardInfo;
             hands[nowPlayerIndex].Card.Add(cardInfo);
             uiManager.OnDraw(cardInfo, nowPlayerIndex);
+            drawCard.transform.SetParent(null);
             Destroy(drawCard.gameObject);
             phase = Phase.Discard;
 
@@ -199,6 +201,7 @@ public class GameManager : MonoBehaviour
             {
                 isOppoCard = true;
                 drawCardPlayerNum = drawCard.hand.playerNum;
+                FindAnswer(nowPlayerHand);
             }
         }
     }
@@ -227,7 +230,7 @@ public class GameManager : MonoBehaviour
                     }
                     cards.Add(dumpDeck.DumpCard);
 
-                    answerManager.FindAnswer(cards);
+                    answerManager.FindAnswer(cards, isMyTurn);
                 }
             }
             else
@@ -239,6 +242,7 @@ public class GameManager : MonoBehaviour
                     drawCardPlayerNum = 9999;
                 }
             }
+            selectCard.gameObject.transform.SetParent(null);
             hands[nowPlayerIndex].Card.Remove(selectCard.cardInfo);
             Destroy(selectCard.gameObject);
             phase = Phase.TurnEnd;
@@ -248,6 +252,7 @@ public class GameManager : MonoBehaviour
 
             if (isMyTurn)
             {
+                FindAnswer(nowPlayerHand);
                 isMyTurn = false;
                 phase = Phase.Draw;
                 enemyManager.StartEnemy();
@@ -272,6 +277,7 @@ public class GameManager : MonoBehaviour
         nowPlayerIndex = 0;
 
         dumpDeck.ResetDumpDeck();
+        answerManager.SetAnswer();
         cardDeckManager.SetDeck();
         SetHands();
     }
@@ -280,8 +286,16 @@ public class GameManager : MonoBehaviour
     {
         if (nowPlayerIndex == nowPlayerNum && phase == Phase.Discard)
         {
-            uiManager.DiscardZone.SetActive(isActive);
-            uiManager.DiscardZone.GetComponent<Image>().color = new Color(255f, 0f, 0f, 0.1f);
+            if (isOppoCard)
+            {
+                uiManager.DiscardZone_Oppocard.SetActive(isActive);
+                uiManager.DiscardZone_Oppocard.GetComponent<Image>().color = new Color(0f, 0f, 255f, 0.5f);
+            }
+            else
+            {
+                uiManager.DiscardZone_Discard.SetActive(isActive);
+                uiManager.DiscardZone_Discard.GetComponent<Image>().color = new Color(0f, 0f, 255f, 0.5f);
+            }
         }
     }
 
@@ -292,14 +306,20 @@ public class GameManager : MonoBehaviour
         cards.Add(playerHand.GetRepCard());
         for (int i = 0; i < playerHand.transform.childCount; i++)
         {
-            cards.Add(playerHand.transform.GetChild(i).GetComponent<Card>());
+            if (playerHand.transform.GetChild(i).GetComponent<Card>() != null)
+            {
+                cards.Add(playerHand.transform.GetChild(i).GetComponent<Card>());
+            }
         }
 
-        answerManager.FindAnswer(cards);
+        answerManager.FindAnswer(cards, !playerHand.isOppo);
 
         if(playerHand.playerNum == nowPlayerNum)
         {
+            if(phase == Phase.Discard)
+            {
 
+            }
         }
     }
 

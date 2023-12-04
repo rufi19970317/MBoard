@@ -63,6 +63,9 @@ public class CardDeckManager : MonoBehaviour
                 Deck.Add(new CardStruct((UniverSity)i, j));
             }
         }
+        Deck.Add(new CardStruct(UniverSity.Joker, 10));
+        Deck.Add(new CardStruct(UniverSity.Joker, 11));
+        Deck.Add(new CardStruct(UniverSity.Joker, 12));
     }
 
     // µ¦ ¼ÅÇÃ

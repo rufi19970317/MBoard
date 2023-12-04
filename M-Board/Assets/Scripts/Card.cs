@@ -60,6 +60,18 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
         if(hand != null) this.hand = hand;
     }
 
+    public bool CompareCard(CardDeckManager.UniverSity university, int num)
+    {
+        if (cardInfo.univerSity == university && cardInfo.num == num)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     // 버리는 카드일 때
     public void SetCard(CardStruct discardCard)
     {
@@ -267,9 +279,9 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
     {
         if(cardState == CardState.MyCard)
         {
-            if(collision.name == "DiscardZone")
+            if(collision.name == "DiscardZone_Discard" || collision.name == "DiscardZone_Oppocard")
             {
-                collision.GetComponent<Image>().color = new Color(0f, 0f, 255f, 0.1f);
+                collision.GetComponent<Image>().color = new Color(255, 0f, 0f, 0.5f);
                 isDiscard = true;
             }
         }
@@ -279,9 +291,9 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
     {
         if (cardState == CardState.MyCard)
         {
-            if (collision.name == "DiscardZone")
+            if (collision.name == "DiscardZone_Discard" || collision.name == "DiscardZone_Oppocard")
             {
-                collision.GetComponent<Image>().color = new Color(255, 0f, 0f, 0.1f);
+                collision.GetComponent<Image>().color = new Color(0f, 0f, 255f, 0.5f);
                 isDiscard = false;
             }
         }

@@ -5,22 +5,34 @@ using UnityEngine.EventSystems;
 using static AnswerManager;
 using System.Linq;
 using UnityEngine.UI;
+using TMPro;
 
-public class AnswerCard : MonoBehaviour, IPointerClickHandler
+public class AnswerCard : MonoBehaviour
 {
     AnswerManager.LeaderAnswerSet leaders;
 
     [SerializeField]
-    public Image frontImage1;
-    public Image frontImage2;
+    private Image frontImage1;
+    [SerializeField]
+    private Image frontImage2;
+    [SerializeField]
+    private TMP_Text text;
+    [SerializeField]
+    private TMP_Text point;
 
     public List<Card> answerResult = new List<Card>();
 
     public void SetAnswer(AnswerManager.LeaderAnswerSet leaders)
     {
         this.leaders = leaders;
-        frontImage1.sprite = Resources.Load<Sprite>("/Images/Icon/" + leaders.university[0]);
-        frontImage2.sprite = Resources.Load<Sprite>("/Images/Icon/" + leaders.university[1]);
+        Debug.Log(leaders.name);
+        frontImage1.sprite = Resources.Load<Sprite>("Images/Icon/Icon_" + leaders.university[0].ToString());
+        frontImage2.sprite = Resources.Load<Sprite>("Images/Icon/Icon_" + leaders.university[1].ToString());
+        text.text = leaders.name;
+        if (leaders.point > 1)
+            point.text = "x" + leaders.point.ToString();
+        else
+            point.text = "";
     }
 
     public void SetResult(List<Card> result)
@@ -28,7 +40,7 @@ public class AnswerCard : MonoBehaviour, IPointerClickHandler
         answerResult = result;
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public void OnMouseEnter()
     {
         /*
         if (particle.activeSelf)
@@ -39,6 +51,11 @@ public class AnswerCard : MonoBehaviour, IPointerClickHandler
 
         GameManager.Instance.OpenAnswerCardPopup(this, result);
         */
+    }
+
+    public void OnMouseExit()
+    {
+        
     }
 
     [SerializeField]
