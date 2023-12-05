@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
         cardDeckManager = GetComponent<CardDeckManager>();
         uiManager.StartGame();
 
-        Screen.SetResolution(2560, 1600, true);
+        Screen.SetResolution(2960, 1440, true);
     }
 
     public static GameManager Instance
@@ -321,6 +321,22 @@ public class GameManager : MonoBehaviour
 
             }
         }
+    }
+
+    public List<Card> GetPlayerCards()
+    {
+        List<Card> cards = new List<Card>();
+
+        cards.Add(nowPlayerHand.GetRepCard());
+        for (int i = 0; i < nowPlayerHand.transform.childCount; i++)
+        {
+            if (nowPlayerHand.transform.GetChild(i).GetComponent<Card>() != null)
+            {
+                cards.Add(nowPlayerHand.transform.GetChild(i).GetComponent<Card>());
+            }
+        }
+
+        return cards;
     }
 
 

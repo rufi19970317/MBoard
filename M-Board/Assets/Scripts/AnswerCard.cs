@@ -42,20 +42,26 @@ public class AnswerCard : MonoBehaviour
 
     public void OnMouseEnter()
     {
-        /*
-        if (particle.activeSelf)
+        Debug.Log(1);
+        if (!GameManager.Instance.isMyTurn && GameManager.Instance.phase == GameManager.Phase.Draw)
         {
-            GameManager.Instance.EndGamePlayerWin(this, answerResult);
             return;
         }
 
-        GameManager.Instance.OpenAnswerCardPopup(this, result);
-        */
+        for (int i = 0; i < leaders.university.Count; i++)
+        {
+            Card correctCard = GameManager.Instance.GetPlayerCards().Find(element => element.cardInfo.univerSity == leaders.university[i]);
+            correctCard.SetParticle(true);
+        }
     }
 
     public void OnMouseExit()
     {
-        
+        for (int i = 0; i < leaders.university.Count; i++)
+        {
+            Card correctCard = GameManager.Instance.GetPlayerCards().Find(element => element.cardInfo.univerSity == leaders.university[i]);
+            correctCard.SetParticle(false);
+        }
     }
 
     [SerializeField]

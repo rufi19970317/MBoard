@@ -145,21 +145,21 @@ public class AnswerManager : MonoBehaviour
     #region Member Answer
     public struct MemberAnswerSet
     {
-        public int num;
+        public string name;
         public Nullable<CardDeckManager.UniverSity> university;
         public List<int> grade;
         public int point;
 
-        public MemberAnswerSet(int num, int point, Nullable<CardDeckManager.UniverSity> university)
+        public MemberAnswerSet(string name, int point, Nullable<CardDeckManager.UniverSity> university)
         {
-            this.num = num;
+            this.name = name;
             this.university = university;
             this.grade = null;
             this.point = point;
         }
-        public MemberAnswerSet(int num, int point, List<int> grade = null)
+        public MemberAnswerSet(string name, int point, List<int> grade = null)
         {
-            this.num = num;
+            this.name = name;
             this.university = null;
             this.grade = grade;
             this.point = point;
@@ -174,17 +174,17 @@ public class AnswerManager : MonoBehaviour
         {
             foreach(CardDeckManager.UniverSity university in Enum.GetValues(typeof(CardDeckManager.UniverSity)))
             {
-                memberAnswerSet.Add(new MemberAnswerSet(university == CardDeckManager.UniverSity.Joker ? 4:0, university == CardDeckManager.UniverSity.Joker?30:20, university));
+                memberAnswerSet.Add(new MemberAnswerSet(university == CardDeckManager.UniverSity.Joker ? "Joker" : "같은 대학", university == CardDeckManager.UniverSity.Joker?30:20, university));
             }
 
             for(int i = 1; i <= 5; i++)
             {
-                memberAnswerSet.Add(new MemberAnswerSet(1, i >= 4?20:15, new List<int>() { i, i, i }));
+                memberAnswerSet.Add(new MemberAnswerSet("같은 등급", i >= 4?20:15, new List<int>() { i, i, i }));
             }
 
-            memberAnswerSet.Add(new MemberAnswerSet(2, 15, new List<int>() { 5, 4, 3 }));
-            memberAnswerSet.Add(new MemberAnswerSet(2, 10, new List<int>() { 4, 3, 2 }));
-            memberAnswerSet.Add(new MemberAnswerSet(2, 5, new List<int>() { 3, 2, 1 }));
+            memberAnswerSet.Add(new MemberAnswerSet("A, B, C", 15, new List<int>() { 5, 4, 3 }));
+            memberAnswerSet.Add(new MemberAnswerSet("B, C, D", 10, new List<int>() { 4, 3, 2 }));
+            memberAnswerSet.Add(new MemberAnswerSet("C, D, F", 5, new List<int>() { 3, 2, 1 }));
         }
 
         public static List<MemberAnswerSet> GetMemberAnswer()
@@ -226,15 +226,15 @@ public class AnswerManager : MonoBehaviour
     {
         public string playerLeaderName;
         public List<Card> playerLeaderCards;
-        public int playerMemberNum;
+        public string playerMemberName;
         public List<Card> playerMemberCards;
         public int point;
 
-        public PlayerAnswer(string playerLeaderName, List<Card> playerLeaderCards, int playerMemberNum, List<Card>playerMemberCards, int point)
+        public PlayerAnswer(string playerLeaderName, List<Card> playerLeaderCards, string playerMemberName, List<Card>playerMemberCards, int point)
         {
             this.playerLeaderName = playerLeaderName;
             this.playerLeaderCards = playerLeaderCards;
-            this.playerMemberNum = playerMemberNum;
+            this.playerMemberName = playerMemberName;
             this.playerMemberCards = playerMemberCards;
             this.point = point;
         }
@@ -332,7 +332,7 @@ public class AnswerManager : MonoBehaviour
                                     List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                                     if (memberCardList.Count >= 2)
                                     {
-                                        PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                        PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                         AllPlayerAnswerCardsList.Add(playerAnswer);
                                     }
                                 }
@@ -358,7 +358,7 @@ public class AnswerManager : MonoBehaviour
                                             List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                                             if (memberCardList.Count == 3)
                                             {
-                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                                 AllPlayerAnswerCardsList.Add(playerAnswer);
                                             }
                                         }
@@ -375,7 +375,7 @@ public class AnswerManager : MonoBehaviour
                                             List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                                             if (memberCardList.Count == 3)
                                             {
-                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                                 AllPlayerAnswerCardsList.Add(playerAnswer);
                                             }
                                         }
@@ -402,7 +402,7 @@ public class AnswerManager : MonoBehaviour
                             List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                             if (memberCardList.Count >= 2)
                             {
-                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                 AllPlayerAnswerCardsList.Add(playerAnswer);
                             }
                         }
@@ -433,7 +433,7 @@ public class AnswerManager : MonoBehaviour
                             List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                             if (memberCardList.Count == 3)
                             {
-                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                 AllPlayerAnswerCardsList.Add(playerAnswer);
                             }
                         }
@@ -478,7 +478,7 @@ public class AnswerManager : MonoBehaviour
                                     List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                                     if (memberCardList.Count >= 2)
                                     {
-                                        PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                        PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                         AllPlayerAnswerCardsList.Add(playerAnswer);
                                     }
                                 }
@@ -505,7 +505,7 @@ public class AnswerManager : MonoBehaviour
                                             List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                                             if (memberCardList.Count == 3)
                                             {
-                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                                 AllPlayerAnswerCardsList.Add(playerAnswer);
                                             }
                                         }
@@ -523,7 +523,7 @@ public class AnswerManager : MonoBehaviour
                                             List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                                             if (memberCardList.Count == 3)
                                             {
-                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                                 AllPlayerAnswerCardsList.Add(playerAnswer);
                                             }
                                         }
@@ -565,7 +565,7 @@ public class AnswerManager : MonoBehaviour
                                     List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                                     if (memberCardList.Count >= 2)
                                     {
-                                        PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                        PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                         AllPlayerAnswerCardsList.Add(playerAnswer);
                                     }
                                 }
@@ -592,7 +592,7 @@ public class AnswerManager : MonoBehaviour
                                             List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                                             if (memberCardList.Count == 3)
                                             {
-                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                                 AllPlayerAnswerCardsList.Add(playerAnswer);
                                             }
                                         }
@@ -610,7 +610,7 @@ public class AnswerManager : MonoBehaviour
                                             List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                                             if (memberCardList.Count == 3)
                                             {
-                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, i, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
+                                                PlayerAnswer playerAnswer = new PlayerAnswer(leaderAnswer.name, playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, leaderAnswer.point * MemberAnswer.GetMemberAnswer()[i].point);
                                                 AllPlayerAnswerCardsList.Add(playerAnswer);
                                             }
                                         }
@@ -639,7 +639,7 @@ public class AnswerManager : MonoBehaviour
                 List<Card> memberCardList = FindMemberAnswer(playerCardsList, i);
                 if (memberCardList.Count == 3)
                 {
-                    PlayerAnswer playerAnswer = new PlayerAnswer("", playerLeaderCardsList, i, memberCardList, 1 * MemberAnswer.GetMemberAnswer()[i].point);
+                    PlayerAnswer playerAnswer = new PlayerAnswer("", playerLeaderCardsList, MemberAnswer.GetMemberAnswer()[i].name, memberCardList, 1 * MemberAnswer.GetMemberAnswer()[i].point);
                     AllPlayerAnswerCardsList.Add(playerAnswer);
                 }
             }

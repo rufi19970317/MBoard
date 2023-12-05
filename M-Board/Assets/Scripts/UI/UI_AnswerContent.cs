@@ -24,7 +24,7 @@ public class UI_AnswerContent : MonoBehaviour
         pointText.text = playerAnswer.point.ToString();
         leaderText.text = playerAnswer.playerLeaderName;
 
-        memberText.text = playerAnswer.playerMemberNum.ToString();
+        memberText.text = playerAnswer.playerMemberName;
 
         for(int i = 0; i < leaderImage.transform.childCount; i++)
         {
