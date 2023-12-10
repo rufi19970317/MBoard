@@ -7,7 +7,7 @@ using System.Linq;
 using UnityEngine.UI;
 using TMPro;
 
-public class AnswerCard : MonoBehaviour
+public class AnswerCard : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     AnswerManager.LeaderAnswerSet leaders;
 
@@ -40,35 +40,31 @@ public class AnswerCard : MonoBehaviour
         answerResult = result;
     }
 
-    public void OnMouseEnter()
-    {
-        Debug.Log(1);
-        if (!GameManager.Instance.isMyTurn && GameManager.Instance.phase == GameManager.Phase.Draw)
-        {
-            return;
-        }
-
-        for (int i = 0; i < leaders.university.Count; i++)
-        {
-            Card correctCard = GameManager.Instance.GetPlayerCards().Find(element => element.cardInfo.univerSity == leaders.university[i]);
-            correctCard.SetParticle(true);
-        }
-    }
-
-    public void OnMouseExit()
-    {
-        for (int i = 0; i < leaders.university.Count; i++)
-        {
-            Card correctCard = GameManager.Instance.GetPlayerCards().Find(element => element.cardInfo.univerSity == leaders.university[i]);
-            correctCard.SetParticle(false);
-        }
-    }
-
     [SerializeField]
     GameObject particle;
 
     public void SetParticle(bool isActive)
     {
         particle.SetActive(isActive);
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        for (int i = 0; i < leaders.university.Count; i++)
+        {
+            Card correctCard = GameManager.Instance.GetPlayerCards().Find(element => element.cardInfo.univerSity == leaders.university[i]
+                            && (element.cardInfo.univerSity == CardDeckManager.UniverSity.Joker || element.cardInfo.num == 4 || element.cardInfo.num == 5));
+            if(correctCard != null) correctCard.SetParticle(true);
+        }
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        for (int i = 0; i < leaders.university.Count; i++)
+        {
+            Card correctCard = GameManager.Instance.GetPlayerCards().Find(element => element.cardInfo.univerSity == leaders.university[i]
+                            && (element.cardInfo.univerSity == CardDeckManager.UniverSity.Joker || element.cardInfo.num == 4 || element.cardInfo.num == 5));
+            if (correctCard != null) correctCard.SetParticle(false);
+        }
     }
 }

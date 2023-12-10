@@ -7,6 +7,8 @@ public class PlayUI : MonoBehaviour
 {
     [SerializeField]
     GameObject playerHand;
+    [SerializeField]
+    GameObject DrawAnim;
 
     [SerializeField]
     GameObject[] otherHands;
@@ -18,16 +20,17 @@ public class PlayUI : MonoBehaviour
         for(int i = 0; i < otherHands.Length; i++)
         {
             otherHands[i].SetActive(false);
+            DrawAnim.SetActive(false);
         }
     }
 
     // 플레이어들 핸드 세팅
-    public void SetHands(int nowPlayerNum, List<Hand> hands)
+    public List<Card> SetHands(int nowPlayerNum, List<Hand> hands)
     {
         playerHands = new List<PlayerHand>();
-
+        List<Card> cards = new List<Card>();
         // 자신의 핸드 세팅
-        playerHand.GetComponent<PlayerHand>().SetHand(hands[nowPlayerNum], nowPlayerNum, false);
+        cards = playerHand.GetComponent<PlayerHand>().SetHand(hands[nowPlayerNum], nowPlayerNum, false);
 
         // 상대 핸드 세팅
         // 2인 플레이 시
@@ -50,7 +53,7 @@ public class PlayUI : MonoBehaviour
                 playerHands.Add(otherHands[1].GetComponent<PlayerHand>());
             }
         }
-        // 3인 이상 플레이 시
+        #region 3인 이상 플레이 시
         else
         {
             for(int i = 0; i < hands.Count - 1; i++)
@@ -116,6 +119,9 @@ public class PlayUI : MonoBehaviour
                 }
             }
         }
+        #endregion
+
+        return cards;
     }
 
     public void SetRepCard(List<CardStruct> repCards)
@@ -141,9 +147,14 @@ public class PlayUI : MonoBehaviour
         deck.SetDeckCard(card);
     }
 
-    public void DrawCard(CardStruct card, int playerNum)
+    public Card DrawCard(CardStruct card, int playerNum)
     {
-        playerHands[playerNum].DrawCard(card);
+        return playerHands[playerNum].DrawCard(card);
+    }
+
+    public  void SetDrawAnimActive(bool isActive)
+    {
+        DrawAnim.SetActive(isActive);
     }
 
     public GameObject GetEnemyHand(int playerNum)

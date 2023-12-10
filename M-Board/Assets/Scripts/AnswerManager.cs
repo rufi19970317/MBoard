@@ -30,6 +30,8 @@ public class AnswerManager : MonoBehaviour
 {
     [SerializeField]
     UI_AnswerList ui_AnswerList;
+    [SerializeField]
+    UI_GPList ui_GPList;
 
     #region Leader Answer
     public struct LeaderAnswerSet
@@ -96,7 +98,7 @@ public class AnswerManager : MonoBehaviour
                 new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Joker, CardDeckManager.UniverSity.SocialSciences  }, 2));
             //13
             leaderAnswerSet.Add(new LeaderAnswerSet("문학과 철학",
-                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Medical, CardDeckManager.UniverSity.Nursing }, 2));
+                new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.Medical, CardDeckManager.UniverSity.Nursing }, 1));
             //14
             leaderAnswerSet.Add(new LeaderAnswerSet("문학과 예술",
                 new List<CardDeckManager.UniverSity>() { CardDeckManager.UniverSity.NaturalScience, CardDeckManager.UniverSity.Engineering }, 1));
@@ -242,6 +244,20 @@ public class AnswerManager : MonoBehaviour
         public int GetPlayerAnswerCardCount()
         {
             return playerLeaderCards.Count + playerMemberCards.Count;
+        }
+    }
+
+    public struct PlayerDefaultAnswer
+    {
+        public string playerMemberName;
+        public List<Card> playerMemberCards;
+        public int point;
+
+        public PlayerDefaultAnswer(string playerMemberName, List<Card> playerMemberCards, int point)
+        {
+            this.playerMemberName = playerMemberName;
+            this.playerMemberCards = playerMemberCards;
+            this.point = point;
         }
     }
 
@@ -650,73 +666,128 @@ public class AnswerManager : MonoBehaviour
             ui_AnswerList.SetAnswerList(AllPlayerAnswerCardsList);
         }
         #endregion
+        FinishAnswer(AllPlayerAnswerCardsList, isPlayer);
+        FindDefualtAnswer(playerCards, isPlayer);
+    }
 
+    public void FindDefualtAnswer(List<Card> playerCards, bool isPlayer)
+    {
         #region Default Answer List
         // 전부 같은 등급일 경우
-        bool isDefaultAnswer_SameGrade = false;
-        int answerNum = 0;
+        List<PlayerDefaultAnswer> playerDefaultAnswer = new List<PlayerDefaultAnswer>();
 
-        for(int i = 1; i <= 5; i++)
-        {
-            int num = 0;
-            for(int j = 0; j < playerCards.Count; j++)
-            {
-                if (playerCards[j].cardInfo.num == i)
-                {
-                    num++;
-                }
-            }
-
-            if (num >= 5)
-            {
-                isDefaultAnswer_SameGrade = true;
-                answerNum = i;
-                break;
-            }
-        }
         // 전부 같은 대학일 경우
-        bool isDefaultAnswer_SameUniversity = false;
-        CardDeckManager.UniverSity answerUniversity;
-        for(int i = 0; i < System.Enum.GetValues(typeof(CardDeckManager.UniverSity)).Length - 1; i++)
+        for (int i = 0; i < System.Enum.GetValues(typeof(CardDeckManager.UniverSity)).Length - 1; i++)
         {
+            List<Card> cards = new List<Card>();
             int num = 0;
-            for(int j = 0; j < playerCards.Count; j++)
+            for (int j = 0; j < playerCards.Count; j++)
             {
                 if (playerCards[j].cardInfo.univerSity == (CardDeckManager.UniverSity)i)
                 {
+                    cards.Add(playerCards[j]);
                     num++;
                 }
             }
 
-            if(num >= 5)
+            if (num >= 4)
             {
-                isDefaultAnswer_SameUniversity = true;
-                answerUniversity = (CardDeckManager.UniverSity)i;
+                playerDefaultAnswer.Add(new PlayerDefaultAnswer("같은 단과대", cards, 50));
                 break;
             }
         }
 
         // 1, 2, 3, 4, 5
-        bool isDefaultAnswer_GradeStair = false;
-        for(int i = 1; i <= 5; i++)
+        List<Card> cards_5 = new List<Card>();
+        for (int i = 1; i <= 5; i++)
         {
-            bool isSame = false;
-            for(int j = 0; j < playerCards.Count; j++)
+            for (int j = 0; j < playerCards.Count; j++)
             {
                 if (playerCards[j].cardInfo.num == i)
                 {
-                    isSame = true;
+                    cards_5.Add(playerCards[j]);
                     break;
                 }
             }
+        }
+        if (cards_5.Count >= 4)
+        {
+            playerDefaultAnswer.Add(new PlayerDefaultAnswer("모든 학점", cards_5, 15));
+        }
 
-            if (!isSame)
+
+        for (int i = 1; i <= 5; i++)
+        {
+            List<Card> cards = new List<Card>();
+
+            int num = 0;
+            for (int j = 0; j < playerCards.Count; j++)
+            {
+                if (playerCards[j].cardInfo.num == i)
+                {
+                    cards.Add(playerCards[j]);
+                    num++;
+                }
+            }
+
+            if (num >= 4)
+            {
+                playerDefaultAnswer.Add(new PlayerDefaultAnswer("같은 학점", cards, i * 5));
                 break;
+            }
+        }
 
-            if (i == 5)
-                isDefaultAnswer_GradeStair = true;
+        if (isPlayer)
+        {
+            ui_GPList.SetAnswerList(playerDefaultAnswer);
         }
         #endregion
+        FinishDefaultAnswer(playerDefaultAnswer, isPlayer);
+    }
+
+    public bool isFinishAnswer = false;
+    public List<PlayerAnswer> playerFinishAnswerList = new List<PlayerAnswer>();
+    private void FinishAnswer(List<PlayerAnswer> playerAnswers, bool isPlayer)
+    {
+        List<PlayerAnswer> finishAnswer = new List<PlayerAnswer>();
+
+        finishAnswer = playerAnswers.FindAll(element => element.GetPlayerAnswerCardCount() == 5);
+        if(finishAnswer.Count > 0)
+        {
+            if (isPlayer)
+            {
+                playerFinishAnswerList = finishAnswer;
+                isFinishAnswer = true;
+            }
+        }
+        else
+        {
+            playerFinishAnswerList.Clear();
+            isFinishAnswer = false;
+        }
+    }
+
+    public bool isFinishDefaultAnswer = false;
+    public List<PlayerDefaultAnswer> playerFinishDefaultAnswerList = new List<PlayerDefaultAnswer>();
+    private void FinishDefaultAnswer(List<PlayerDefaultAnswer> playerDefaultAnswers, bool isPlayer)
+    {
+        List<PlayerDefaultAnswer> finishDefaultAnswer = new List<PlayerDefaultAnswer>();
+
+
+        finishDefaultAnswer = playerDefaultAnswers.FindAll(element => element.playerMemberCards.Count == 5);
+        if (finishDefaultAnswer.Count > 0)
+        {
+            if (isPlayer)
+            {
+                playerFinishDefaultAnswerList = finishDefaultAnswer;
+                isFinishDefaultAnswer = true;
+            }
+        }
+        else
+        {
+            playerFinishDefaultAnswerList.Clear();
+            isFinishDefaultAnswer = false;
+        }
     }
 
     public void ConfirmAnswer()

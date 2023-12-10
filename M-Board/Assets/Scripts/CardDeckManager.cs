@@ -80,7 +80,6 @@ public class CardDeckManager : MonoBehaviour
         if(Deck.Count == 0)
         {
             GameManager.Instance.ResetRound();
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             return new CardStruct();
         }
 

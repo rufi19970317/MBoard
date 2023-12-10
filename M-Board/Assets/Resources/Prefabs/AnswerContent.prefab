@@ -933,6 +933,7 @@ GameObject:
   - component: {fileID: 4718905728107673920}
   - component: {fileID: 4718905728107673922}
   - component: {fileID: -2079219698113798497}
+  - component: {fileID: 4128044034123864742}
   m_Layer: 5
   m_Name: AnswerContent
   m_TagString: Untagged
@@ -991,6 +992,32 @@ MonoBehaviour:
   pointText: {fileID: 5783900389743922488}
   leaderText: {fileID: 3669717718708606284}
   memberText: {fileID: 160491598167667204}
+--- !u!61 &4128044034123864742
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4718905728107673927}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 440, y: 180}
+  m_EdgeRadius: 0
 --- !u!1 &5898844417685704508
 GameObject:
   m_ObjectHideFlags: 0

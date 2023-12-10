@@ -15,6 +15,9 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     Button ResetButton;
 
+    [SerializeField]
+    UI_Point pointUI;
+
     public GameObject DiscardZone_Discard;
     public GameObject DiscardZone_Oppocard;
     public GameObject ChangeZone;
@@ -28,7 +31,13 @@ public class UIManager : MonoBehaviour
     {
         StartUI.SetActive(false);
         playUI.gameObject.SetActive(true);
-        playUI.SetHands(nowPlayerNum, hands);
+        SetHands(nowPlayerNum, hands);
+        pointUI.SetPoint();
+    }
+
+    public List<Card> SetHands(int nowPlayerNum, List<Hand> hands)
+    {
+        return playUI.SetHands(nowPlayerNum, hands);
     }
 
     public void SetRepCard(List<CardStruct> repCards)
@@ -47,19 +56,25 @@ public class UIManager : MonoBehaviour
         playUI.gameObject.SetActive(false);
     }
 
-    public void OnDraw(CardStruct card, int playerNum)
+    public Card OnDraw(CardStruct card, int playerNum)
     {
-        playUI.DrawCard(card, playerNum);
+        return playUI.DrawCard(card, playerNum);
     }
 
     public void OnFinish(int point, int playerNum)
     {
-
+        if (playerNum == 0) pointUI.SetPlayerPoint(point);
+        else if (playerNum == 1) pointUI.SetEnemyPoint(point);
     }
 
     public void SetDeckCard(CardStruct card)
     {
         playUI.SetDeckCard(card);
+    }
+
+    public void SetDrawAnimActive(bool isActive)
+    {
+        playUI.SetDrawAnimActive(isActive);
     }
 
     public void ResetGame()

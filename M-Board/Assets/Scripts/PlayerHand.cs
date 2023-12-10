@@ -17,8 +17,9 @@ public class PlayerHand : MonoBehaviour
     }
 
     // 게임 시작 시, 핸드 세팅
-    public void SetHand(Hand hand, int num, bool isOppo)
+    public List<Card> SetHand(Hand hand, int num, bool isOppo)
     {
+        List<Card> cards = new List<Card>();
         // 전부 리셋
         foreach (Transform child in transform)
         {
@@ -37,6 +38,7 @@ public class PlayerHand : MonoBehaviour
             {
                 newCard = Instantiate(Resources.Load<GameObject>("Prefabs/Card"), transform).GetComponent<Card>();
                 newCard.SetCard(this, hand.Card[i], Card.CardState.MyCard);
+                cards.Add(newCard);
             }
             else
             {
@@ -46,12 +48,13 @@ public class PlayerHand : MonoBehaviour
         }
 
         playerNum = num;
+        return cards;
     }
 
-    public void SetRepCard(CardStruct cardInfo)
+    public Card SetRepCard(CardStruct cardInfo)
     {
         RepCard.gameObject.SetActive(true);
-        RepCard.SetCard(this, cardInfo, Card.CardState.RepCard);
+        return RepCard.SetCard(this, cardInfo, Card.CardState.RepCard);
     }
 
     public Card GetRepCard()
@@ -59,19 +62,25 @@ public class PlayerHand : MonoBehaviour
         return RepCard;
     }
 
-    public void DrawCard(CardStruct card)
+    public Card DrawCard(CardStruct card)
     {
         if (!isOppo)
         {
             Card newCard = Instantiate(Resources.Load<GameObject>("Prefabs/Card"), transform).GetComponent<Card>();
             newCard.SetCard(this, card, Card.CardState.MyCard);
-            GameManager.Instance.FindAnswer(this);
+            return newCard;
         }
         else
         {
             Card newCard = Instantiate(Resources.Load<GameObject>("Prefabs/OppoCard"), transform).GetComponent<Card>();
             newCard.SetCard(this, card, Card.CardState.OppoCard);
-            GameManager.Instance.FindAnswer(this);
+            return newCard;
         }
+    }
+
+    public void ChangeCard(CardStruct card)
+    {
+        Card newCard = Instantiate(Resources.Load<GameObject>("Prefabs/Card"), transform).GetComponent<Card>();
+        newCard.SetCard(this, card, Card.CardState.MyCard);
     }
 }

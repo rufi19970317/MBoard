@@ -37,7 +37,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
     }
 
     // 카드 세팅
-    public void SetCard(PlayerHand hand, CardStruct cardStruct, CardState cardState)
+    public Card SetCard(PlayerHand hand, CardStruct cardStruct, CardState cardState)
     {
         this.cardState = cardState;
 
@@ -58,6 +58,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
 
         cardInfo = cardStruct;
         if(hand != null) this.hand = hand;
+        return this;
     }
 
     public bool CompareCard(CardDeckManager.UniverSity university, int num)
@@ -101,7 +102,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
         switch(cardState)
         {
             case CardState.MyCard:
-                if (!(!GameManager.Instance.isMyTurn && GameManager.Instance.phase == GameManager.Phase.Draw))
+                if (!(!GameManager.Instance.isMyTurn && GameManager.Instance.GamePhase == GameManager.Phase.Draw))
                 {
                     GameManager.Instance.SetActiveDiscardZone(true);
                     parent = transform.parent;
@@ -115,7 +116,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
                 return;
             case CardState.OppoCard:
             case CardState.DeckCard:
-                if (GameManager.Instance.phase == GameManager.Phase.Draw && GameManager.Instance.isMyTurn)
+                if (GameManager.Instance.GamePhase == GameManager.Phase.Draw && GameManager.Instance.isMyTurn)
                 {
                     startTouchPosY = eventData.position.y;
                     startPos = transform.position;
@@ -177,7 +178,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
                 return;
             case CardState.OppoCard:
             case CardState.DeckCard:
-                if (GameManager.Instance.phase == GameManager.Phase.Draw)
+                if (GameManager.Instance.GamePhase == GameManager.Phase.Draw)
                 {
                     float maxDis = 0f;
                     if (cardState == CardState.OppoCard) maxDis = 2f;
@@ -240,6 +241,11 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
                     {
                         GameManager.Instance.SetActiveDiscardZone(false);
                     }
+
+                    if(isChange)
+                    {
+                        GameManager.Instance.ChangeCard(this);
+                    }
                     isStartDrag = false;
                 }
                 break;
@@ -274,6 +280,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
     }
 
     bool isDiscard = false;
+    bool isChange = false;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -283,6 +290,12 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
             {
                 collision.GetComponent<Image>().color = new Color(255, 0f, 0f, 0.5f);
                 isDiscard = true;
+            }
+
+            if(collision.name == "ChangeZone" && GameManager.Instance.GamePhase == GameManager.Phase.Draw)
+            {
+                collision.GetComponent<Image>().color = new Color(255, 0f, 0f, 0.5f);
+                isChange = true;
             }
         }
     }
@@ -295,6 +308,13 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
             {
                 collision.GetComponent<Image>().color = new Color(0f, 0f, 255f, 0.5f);
                 isDiscard = false;
+            }
+
+
+            if (collision.name == "ChangeZone" && GameManager.Instance.GamePhase == GameManager.Phase.Draw)
+            {
+                collision.GetComponent<Image>().color = new Color(0f, 0f, 255f, 0.5f);
+                isChange = false;
             }
         }
     }

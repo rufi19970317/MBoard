@@ -24,7 +24,7 @@ public class EnemyManager : MonoBehaviour
 
     IEnumerator EnemyTurn()
     {
-        yield return new WaitForSecondsRealtime(2f);
+        yield return new WaitForSecondsRealtime(3f);
         DrawCard();
         yield return new WaitForSecondsRealtime(3f);
 
@@ -40,7 +40,7 @@ public class EnemyManager : MonoBehaviour
 
     void DrawCard()
     {
-        GameManager.Instance.phase = GameManager.Phase.Draw;
+        GameManager.Instance.GamePhase = GameManager.Phase.Draw;
         System.Random ran = new System.Random();
         int a = ran.Next(0, 2);
         if (a == 0)
@@ -55,7 +55,7 @@ public class EnemyManager : MonoBehaviour
             GameManager.Instance.EnemyDrawCard(card, Card.CardState.MyCard);
         }
 
-        GameManager.Instance.phase = GameManager.Phase.Discard;
+        GameManager.Instance.GamePhase = GameManager.Phase.Discard;
     }
 
     void DiscardCard()

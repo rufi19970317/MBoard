@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using static AnswerManager;
@@ -34,6 +36,12 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private UIManager uiManager;
 
+    [SerializeField]
+    Button FinishAnswerBtn;
+    [SerializeField]
+    Button FinishDefaultAnswerBtn;
+    int roundNum = 0;
+
     void Awake()
     {
         if (null == instance)
@@ -48,7 +56,20 @@ public class GameManager : MonoBehaviour
         cardDeckManager = GetComponent<CardDeckManager>();
         uiManager.StartGame();
 
+        FinishAnswerBtn.onClick.AddListener(OpenFinishAnswerPopup);
+        FinishDefaultAnswerBtn.onClick.AddListener(OpenFinishDefaultAnswerPopup);
         Screen.SetResolution(2960, 1440, true);
+        /*
+#if(UNITY_ANDROID)
+        int i_width = Screen.width;
+        int i_height = Screen.height;
+        Input.multiTouchEnabled = false;
+        Screen.SetResolution(i_width, i_height, true);
+#elif(UNITY_EDITOR)
+        Screen.SetResolution(2960, 1440, true);
+#endif
+        */
+        Application.targetFrameRate = 60;
     }
 
     public static GameManager Instance
@@ -71,15 +92,17 @@ public class GameManager : MonoBehaviour
     // 네트워크마다 달라야 함
     private int nowPlayerNum = 0;
 
-    public List<CardStruct> RepCards = new List<CardStruct> ();
-
     [SerializeField]
     AnswerManager answerManager;
+
+    int playerPoint = 0;
+    int enemyPoint = 0;
 
     // 게임 시작
     public void OnPlay(int num)
     {
         if (num == 0) return;
+        roundNum++;
 
         isEnd = false;
         // 플레이어 숫자
@@ -106,16 +129,19 @@ public class GameManager : MonoBehaviour
         answerManager.SetAnswer();
 
         nowPlayerHand = uiManager.GetPlayerHand(0).GetComponent<PlayerHand>();
-        FindAnswer(nowPlayerHand);
         enemyManager.SetEnemy(uiManager.GetPlayerHand(1));
+
+        playerPoint = 0;
+        enemyPoint = 0;
 
         // 첫 번째 플레이어부터 게임 시작
         if (nowPlayerNum == nowPlayerIndex)
         {
-            phase = Phase.Draw;
             isMyTurn = true;
+            GamePhase = Phase.Draw;
         }
     }
+    List<CardStruct> RepCards = new List<CardStruct>();
 
     // 플레이어들 핸드 세팅
     private void SetHands()
@@ -149,7 +175,53 @@ public class GameManager : MonoBehaviour
         GameEnd
     }
 
-    public Phase phase = Phase.TurnEnd;
+    Phase phase = Phase.TurnEnd;
+
+    [SerializeField]
+    UI_PhasePopUp phasePopUp;
+    public Phase GamePhase
+    {
+        get { return phase; }
+        set
+        {
+            phase = value;
+            GameManager.Instance.PlayerPareticleOff();
+            switch (phase)
+            {
+                case Phase.Draw:
+                    if(isMyTurn)
+                    {
+                        uiManager.SetDrawAnimActive(true);
+                    }
+                    else
+                    {
+
+                    }
+                    break;
+                case Phase.Discard:
+                    if (isMyTurn)
+                    {
+                        uiManager.SetDrawAnimActive(false);
+                    }
+                    break;
+            }
+
+            if (selectCard != null) selectCard.GetComponent<Card>().OnEndDrag(null);
+            if (!isResetRound) FindAnswer(nowPlayerHand);
+            phasePopUp.OnPhasePopUp(GamePhase, isMyTurn);
+
+            if (phase == Phase.Discard && isMyTurn)
+            {
+                if (answerManager.isFinishAnswer) FinishAnswerBtn.gameObject.SetActive(true);
+                if (answerManager.isFinishDefaultAnswer) FinishDefaultAnswerBtn.gameObject.SetActive(true);
+            }
+            else
+            {
+                FinishAnswerBtn.gameObject.SetActive(false);
+                FinishDefaultAnswerBtn.gameObject.SetActive(false);
+            }
+        }
+    }
 
     bool isOppoCard = false;
     int drawCardPlayerNum = 9999;
@@ -161,13 +233,13 @@ public class GameManager : MonoBehaviour
     // 내 턴에 카드 뽑기
     public void DrawCard(Card drawCard, Card.CardState cardState)
     {
-        if(isMyTurn && phase == Phase.Draw)
+        if(isMyTurn && GamePhase == Phase.Draw)
         {
             CardStruct cardInfo = drawCard.cardInfo;
             hands[nowPlayerIndex].Card.Add(cardInfo);
             uiManager.OnDraw(cardInfo, nowPlayerIndex);
             Destroy(drawCard.gameObject);
-            phase = Phase.Discard;
+            GamePhase = Phase.Discard;
 
             if (cardState == Card.CardState.DeckCard)
             {
@@ -183,14 +255,13 @@ public class GameManager : MonoBehaviour
     }
     public void EnemyDrawCard(Card drawCard, Card.CardState cardState)
     {
-        if (!isMyTurn && phase == Phase.Draw)
+        if (!isMyTurn && GamePhase == Phase.Draw)
         {
             CardStruct cardInfo = drawCard.cardInfo;
             hands[nowPlayerIndex].Card.Add(cardInfo);
             uiManager.OnDraw(cardInfo, nowPlayerIndex);
             drawCard.transform.SetParent(null);
             Destroy(drawCard.gameObject);
-            phase = Phase.Discard;
 
             if (cardState == Card.CardState.DeckCard)
             {
@@ -201,8 +272,8 @@ public class GameManager : MonoBehaviour
             {
                 isOppoCard = true;
                 drawCardPlayerNum = drawCard.hand.playerNum;
-                FindAnswer(nowPlayerHand);
             }
+            GamePhase = Phase.Discard;
         }
     }
 
@@ -213,7 +284,7 @@ public class GameManager : MonoBehaviour
 
     public void DiscardCard(Card selectCard)
     {
-        if (phase == Phase.Discard)
+        if (GamePhase == Phase.Discard)
         {
             SetActiveDiscardZone(false);
             if (!isOppoCard)
@@ -229,8 +300,6 @@ public class GameManager : MonoBehaviour
                         cards.Add(nowPlayerHand.transform.GetChild(i).GetComponent<Card>());
                     }
                     cards.Add(dumpDeck.DumpCard);
-
-                    answerManager.FindAnswer(cards, isMyTurn);
                 }
             }
             else
@@ -245,23 +314,63 @@ public class GameManager : MonoBehaviour
             selectCard.gameObject.transform.SetParent(null);
             hands[nowPlayerIndex].Card.Remove(selectCard.cardInfo);
             Destroy(selectCard.gameObject);
-            phase = Phase.TurnEnd;
+            GamePhase = Phase.TurnEnd;
 
             nowPlayerIndex++;
             if (nowPlayerIndex >= playerNum) nowPlayerIndex -= playerNum;
 
             if (isMyTurn)
             {
-                FindAnswer(nowPlayerHand);
                 isMyTurn = false;
-                phase = Phase.Draw;
+                GamePhase = Phase.Draw;
                 enemyManager.StartEnemy();
             }
             else
             {
                 isMyTurn = true;
-                phase = Phase.Draw;
+                GamePhase = Phase.Draw;
 
+            }
+        }
+    }
+
+    public void ChangeCard(Card selectCard)
+    {
+        if(GamePhase == Phase.Draw)
+        {
+            Card repCard = nowPlayerHand.GetRepCard();
+
+            hands[nowPlayerIndex].Card.Add(repCard.cardInfo);
+
+            if(isMyTurn)
+            {
+                nowPlayerHand.ChangeCard(repCard.cardInfo);
+                nowPlayerHand.SetRepCard(selectCard.cardInfo);
+                uiManager.SetDrawAnimActive(false);
+            }
+            else
+            {
+
+            }
+
+            selectCard.gameObject.transform.SetParent(null);
+            hands[nowPlayerIndex].Card.Remove(selectCard.cardInfo);
+            Destroy(selectCard.gameObject);
+            GamePhase = Phase.TurnEnd;
+
+            nowPlayerIndex++;
+            if (nowPlayerIndex >= playerNum) nowPlayerIndex -= playerNum;
+
+            if (isMyTurn)
+            {
+                isMyTurn = false;
+                GamePhase = Phase.Draw;
+                enemyManager.StartEnemy();
+            }
+            else
+            {
+                isMyTurn = true;
+                GamePhase = Phase.Draw;
             }
         }
     }
@@ -272,19 +381,43 @@ public class GameManager : MonoBehaviour
         if (nowPlayerIndex == playerNum) nowPlayerIndex = 0;
     }
 
+    bool isResetRound = false;
     public void ResetRound()
     {
-        nowPlayerIndex = 0;
+        isResetRound = true;
+        roundNum++;
 
+        // 버림패 리셋
         dumpDeck.ResetDumpDeck();
-        answerManager.SetAnswer();
+        // 덱 세팅
         cardDeckManager.SetDeck();
+
+        // 플레이어들 핸드 세팅
         SetHands();
+        List<Card> cards = uiManager.SetHands(nowPlayerNum, hands);
+        uiManager.SetRepCard(RepCards);
+
+        // 덱 카드 세팅
+        uiManager.SetDeckCard(cardDeckManager.DrawCard());
+
+        answerManager.ResetAnswerList();
+        answerManager.SetAnswer();
+
+        enemyManager.SetEnemy(uiManager.GetPlayerHand(1));
+
+        // 첫 번째 플레이어부터 게임 시작
+        if (nowPlayerNum == nowPlayerIndex)
+        {
+            isMyTurn = true;
+            GamePhase = Phase.Draw;
+            answerManager.FindAnswer(cards, true);
+        }
+        isResetRound = false;
     }
 
     public void SetActiveDiscardZone(bool isActive)
     {
-        if (nowPlayerIndex == nowPlayerNum && phase == Phase.Discard)
+        if (nowPlayerIndex == nowPlayerNum && GamePhase == Phase.Discard)
         {
             if (isOppoCard)
             {
@@ -313,14 +446,6 @@ public class GameManager : MonoBehaviour
         }
 
         answerManager.FindAnswer(cards, !playerHand.isOppo);
-
-        if(playerHand.playerNum == nowPlayerNum)
-        {
-            if(phase == Phase.Discard)
-            {
-
-            }
-        }
     }
 
     public List<Card> GetPlayerCards()
@@ -347,83 +472,141 @@ public class GameManager : MonoBehaviour
     }
 
     [SerializeField]
-    GameObject AnswerCardPopUp;
-    
-    public void OpenAnswerCardPopup(AnswerCard answerCard, List<Card> result)
-    {
-        if (selectCard != null) return;
-        if (!AnswerCardPopUp.activeSelf)
-        {
-            AnswerCardPopUp.SetActive(true);
-            GameObject grid = AnswerCardPopUp.transform.GetChild(2).gameObject;
-            grid.SetActive(true);
-            foreach(Transform child in grid.transform)
-            {
-                child.gameObject.SetActive(false);
-            }
+    GameObject FinishAnswerPopUp;
 
-            for(int i = 0; i < result.Count; i++)
-            {
-                CardStruct cardStruct = result[i].cardInfo;
-                grid.transform.GetChild(i).gameObject.SetActive(true);
-                grid.transform.GetChild(i).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/Students/Student_" + cardStruct.univerSity.ToString() + "_" + cardStruct.num.ToString());
-            }
-        }
+    private void OpenFinishAnswerPopup()
+    {
+        FinishAnswerPopUp.GetComponent<UI_FinishAnswerPopUp>().SetAnswerList(answerManager.playerFinishAnswerList);
+        FinishAnswerPopUp.SetActive(true);
     }
 
-    public void EndGamePlayerWin(AnswerCard answer, List<Card> result)
+    [SerializeField]
+    GameObject FinishDefaultAnswerPopUp;
+
+    private void OpenFinishDefaultAnswerPopup()
     {
+        FinishDefaultAnswerPopUp.GetComponent<UI_FinishDefaultAnswerPopUp>().SetAnswerList(answerManager.playerFinishDefaultAnswerList);
+        FinishDefaultAnswerPopUp.SetActive(true);
+    }
+
+    public void FinishAnswer(PlayerAnswer playerAnswer)
+    {
+        FinishAnswerPopUp.SetActive(false);
         if(isMyTurn)
         {
-            EndGamePopUp.SetActive(true);
-            EndGamePopUp.transform.GetChild(1).GetComponentInChildren<TMP_Text>().text = "You Win!";
-
-
-            GameObject grid = EndGamePopUp.transform.GetChild(3).gameObject;
-            foreach (Transform child in grid.transform)
-            {
-                child.gameObject.SetActive(false);
-            }
-
-            grid.transform.GetChild(0).gameObject.SetActive(true);
-            for (int i = 0; i < result.Count; i++)
-            {
-                CardStruct cardStruct = result[i].cardInfo;
-                grid.transform.GetChild(i + 1).gameObject.SetActive(true);
-                grid.transform.GetChild(i + 1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/Students/Student_" + cardStruct.univerSity.ToString() + "_" + cardStruct.num.ToString());
-            }
-        }
-    }
-    public void EndGame(AnswerCard answer, List<Card> result)
-    {
-        if (!isMyTurn && phase == Phase.Draw)
-        {
-            enemyManager.StopAllCoroutines();
-            EndGamePopUp.SetActive(true);
-            EndGamePopUp.transform.GetChild(1).GetComponentInChildren<TMP_Text>().text = "Enemy Win...";
-
-            GameObject grid = EndGamePopUp.transform.GetChild(3).gameObject;
-            foreach (Transform child in grid.transform)
-            {
-                child.gameObject.SetActive(false);
-            }
-
-            grid.transform.GetChild(0).gameObject.SetActive(true);
-            for (int i = 0; i < result.Count; i++)
-            {
-                CardStruct cardStruct = result[i].cardInfo;
-                grid.transform.GetChild(i + 1).gameObject.SetActive(true);
-                grid.transform.GetChild(i + 1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/Students/Student_" + cardStruct.univerSity.ToString() + "_" + cardStruct.num.ToString());
-            }
+            playerPoint += playerAnswer.point;
+            uiManager.OnFinish(playerPoint, 0);
         }
         else
         {
-            isEnd = true;
-            foreach(Card card in result)
+            enemyPoint += playerAnswer.point;
+            uiManager.OnFinish(enemyPoint, 1);
+        }
+        FinishAnswerBtn.gameObject.SetActive(false);
+        FinishDefaultAnswerBtn.gameObject.SetActive(false);
+        if (roundNum < 2)
+        {
+            ResetRound();
+        }
+        else
+        {
+            EndGame();
+        }
+    }
+
+    private void EndGame()
+    {
+        EndGamePopUp.SetActive(true);
+        EndGamePopUp.GetComponent<UI_EndGame>().SetPopUp(playerPoint, enemyPoint);
+
+    }
+
+    public void FinishDefaultAnswer(PlayerDefaultAnswer playerDefaultAnswer)
+    {
+        FinishDefaultAnswerPopUp.SetActive(false);
+        if (isMyTurn)
+        {
+            playerPoint += playerDefaultAnswer.point;
+
+            List<Card> cards = new List<Card>();
+            List<Card> newCards = new List<Card>();
+
+            Card repCard = playerDefaultAnswer.playerMemberCards.Find(element => element.CompareCard(nowPlayerHand.GetRepCard().cardInfo.univerSity, nowPlayerHand.GetRepCard().cardInfo.num));
+
+            if (repCard != null)
             {
-                card.SetParticle(true);
+                newCards.Add(nowPlayerHand.SetRepCard(cardDeckManager.DrawCard()));
+
+                for (int i = 0; i < nowPlayerHand.transform.childCount; i++)
+                {
+                    if (nowPlayerHand.transform.GetChild(i).GetComponent<Card>() != null)
+                    {
+                        cards.Add(nowPlayerHand.transform.GetChild(i).GetComponent<Card>());
+                    }
+                }
+
+                for (int i = 0; i < playerDefaultAnswer.playerMemberCards.Count; i++)
+                {
+                    Card card = cards.Find(element => element.CompareCard(playerDefaultAnswer.playerMemberCards[i].cardInfo.univerSity, playerDefaultAnswer.playerMemberCards[i].cardInfo.num));
+
+                    if (card != null)
+                    {
+                        hands[nowPlayerIndex].Card.Remove(card.cardInfo);
+                        Destroy(card.gameObject);
+
+                        CardStruct cardInfo = cardDeckManager.DrawCard();
+                        hands[nowPlayerIndex].Card.Add(cardInfo);
+                        newCards.Add(uiManager.OnDraw(cardInfo, nowPlayerIndex));
+                    }
+                }
             }
-            answer.SetParticle(true);
+            else
+            {
+                for (int i = 0; i < nowPlayerHand.transform.childCount; i++)
+                {
+                    if (nowPlayerHand.transform.GetChild(i).GetComponent<Card>() != null)
+                    {
+                        cards.Add(nowPlayerHand.transform.GetChild(i).GetComponent<Card>());
+                    }
+                }
+
+                for (int i = 0; i < playerDefaultAnswer.playerMemberCards.Count; i++)
+                {
+                    Card card = cards.Find(element => element.CompareCard(playerDefaultAnswer.playerMemberCards[i].cardInfo.univerSity, playerDefaultAnswer.playerMemberCards[i].cardInfo.num));
+                    if (card != null)
+                    {
+                        hands[nowPlayerIndex].Card.Remove(card.cardInfo);
+                        Destroy(card.gameObject);
+
+                        CardStruct cardInfo = cardDeckManager.DrawCard();
+                        hands[nowPlayerIndex].Card.Add(cardInfo);
+                        newCards.Add(uiManager.OnDraw(cardInfo, nowPlayerIndex));
+                    }
+                }
+            }
+            uiManager.OnFinish(playerPoint, 0);
+            FinishAnswerBtn.gameObject.SetActive(false);
+            FinishDefaultAnswerBtn.gameObject.SetActive(false);
+
+            answerManager.FindAnswer(newCards, true);
+
+            if (answerManager.isFinishAnswer) FinishAnswerBtn.gameObject.SetActive(true);
+            if (answerManager.isFinishDefaultAnswer) FinishDefaultAnswerBtn.gameObject.SetActive(true);
+        }
+        else
+        {
+            enemyPoint += playerDefaultAnswer.point;
+            uiManager.OnFinish(enemyPoint, 1);
+        }
+    }
+
+    public void PlayerPareticleOff()
+    {
+        if (selectCard != null) return;
+        List<Card> cards = GetPlayerCards();
+        foreach(Card card in cards)
+        {
+            card.SetParticle(false);
         }
     }
 

@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static AnswerManager;
 
-public class UI_AnswerContent : MonoBehaviour
+public class UI_AnswerContent : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [SerializeField]
     private GameObject leaderImage;
@@ -18,9 +19,14 @@ public class UI_AnswerContent : MonoBehaviour
     [SerializeField]
     private TMP_Text memberText;
 
+    PlayerAnswer playerAnswer;
+    bool isPopupContent = false;
 
-    public void SetAnswer(PlayerAnswer playerAnswer)
+    public void SetAnswer(PlayerAnswer playerAnswer, bool isPopupContent)
     {
+        this.isPopupContent = isPopupContent;
+        this.playerAnswer = playerAnswer;
+
         pointText.text = playerAnswer.point.ToString();
         leaderText.text = playerAnswer.playerLeaderName;
 
@@ -82,5 +88,37 @@ public class UI_AnswerContent : MonoBehaviour
                     break;
             }
         }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (isPopupContent) return;
+        for (int i = 0; i < playerAnswer.playerLeaderCards.Count; i++)
+        {
+            playerAnswer.playerLeaderCards[i].SetParticle(true);
+        }
+        for (int i = 0; i < playerAnswer.playerMemberCards.Count; i++)
+        {
+            playerAnswer.playerMemberCards[i].SetParticle(true);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (isPopupContent) return;
+        for (int i = 0; i < playerAnswer.playerLeaderCards.Count; i++)
+        {
+            playerAnswer.playerLeaderCards[i].SetParticle(false);
+        }
+        for (int i = 0; i < playerAnswer.playerMemberCards.Count; i++)
+        {
+            playerAnswer.playerMemberCards[i].SetParticle(false);
+        }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (!isPopupContent) return;
+        GameManager.Instance.FinishAnswer(playerAnswer);
     }
 }

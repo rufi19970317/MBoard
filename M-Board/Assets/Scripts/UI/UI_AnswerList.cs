@@ -29,7 +29,7 @@ public class UI_AnswerList : MonoBehaviour
     {
         openBtn.onClick.AddListener(OnOpenList);
         closeBtn.onClick.AddListener(OnCloseList);
-        OnCloseList();
+        OnOpenList();
     }
 
     private void Update()
@@ -48,14 +48,18 @@ public class UI_AnswerList : MonoBehaviour
 
     public void SetAnswerList(List<PlayerAnswer> AllPlayerAnswerCardsList)
     {
+        ResetList();
+        foreach (PlayerAnswer card in AllPlayerAnswerCardsList)
+        {
+            Instantiate(contentPrefab, answerFolder.transform).GetComponent<UI_AnswerContent>().SetAnswer(card, false);
+        }
+    }
+
+    public void ResetList()
+    {
         for (int i = 0; i < answerFolder.transform.childCount; i++)
         {
             Destroy(answerFolder.transform.GetChild(i).gameObject);
-        }
-
-        foreach (PlayerAnswer card in AllPlayerAnswerCardsList)
-        {
-            Instantiate(contentPrefab, answerFolder.transform).GetComponent<UI_AnswerContent>().SetAnswer(card);
         }
     }
 

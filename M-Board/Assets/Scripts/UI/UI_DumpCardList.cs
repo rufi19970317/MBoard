@@ -23,7 +23,7 @@ public class UI_DumpCardList : MonoBehaviour
     {
         for(int i = 0; i < dumpList.transform.childCount; i++)
         {
-            Destroy(dumpList.transform.GetChild(i));
+            Destroy(dumpList.transform.GetChild(i).gameObject);
         }
     }
 }
